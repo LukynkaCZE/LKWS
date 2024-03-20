@@ -27,6 +27,7 @@ class LightweightWebServer(var port: Int = 7270) {
 
     fun get(path: String, function: (res: GetResponse) -> Unit) {
         val endpointPath = if(path.startsWith("/")) path else "/$path"
+        endpointPath.removeSuffix("/")
         val tokens = endpointPath.split("/")
         val replacables = mutableListOf<Int>()
         tokens.forEachIndexed { index, it ->
