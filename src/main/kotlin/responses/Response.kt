@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package responses
 
 import com.sun.net.httpserver.HttpExchange
