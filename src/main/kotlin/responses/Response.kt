@@ -9,6 +9,8 @@ open class Response(var httpExchange: HttpExchange) {
 
     var headers: MutableList<Pair<String, String>> = mutableListOf()
 
+    var parameters: MutableMap<String, String> = mutableMapOf()
+
     fun respond(message: String, statusCode: Int? = null) {
         respond(message.toByteArray(), statusCode)
     }

@@ -50,13 +50,9 @@ class LightweightWebServer(var port: Int = 7270) {
                 val matchingEndpoint = findMatchingEndpoint(path)
                 val endpoint: Endpoint = matchingEndpoint.first ?: throw Exception("No such path as `$path` exists!")
 
-                val replacables = matchingEndpoint.second
-                replacables.forEach {(key, value) ->
-                    println("[Replacable] $key - $value")
-                }
-
                 //Get response and execute the Unit in Endpoint whose path matches the uri path
                 val response = GetResponse(t)
+                response.parameters = matchingEndpoint.second
                 endpoint.unit.invoke(response)
 
             } catch (exception: Exception) {
