@@ -8,7 +8,7 @@ import responses.GetResponse
 import responses.Response
 import java.net.InetSocketAddress
 
-class LightweightWebServer(var port: Int) {
+class LightweightWebServer(var port: Int = 7270) {
 
     private var server: HttpServer = HttpServer.create(InetSocketAddress(port), 0);
 
@@ -27,27 +27,37 @@ class LightweightWebServer(var port: Int) {
 
     fun get(path: String, function: (res: GetResponse) -> Unit) {
         val endpointPath = if(path.startsWith("/")) path else "/$path"
-        endpoints.add(Endpoint(endpointPath, function as (Response) -> Unit, EndpointType.GET))
+        val tokens = endpointPath.split("/")
+        val replacables = mutableListOf<Int>()
+        tokens.forEachIndexed { index, it ->
+            if(it.startsWith("{") && it.endsWith("}"))
+            replacables.add(index)
+        }
+        endpoints.add(Endpoint(endpointPath, function as (Response) -> Unit, EndpointType.GET, replacables))
     }
 
     fun error(function: (res: ErrorResponse) -> Unit) {
         errorResponse = function
     }
 
-
-
     private class Handler : HttpHandler {
         override fun handle(t: HttpExchange) {
             try {
 
-                val path = t.requestURI.rawPath
+                val path = t.requestURI.path
 
                 // Throw if there is no endpoint with that path
-                if (!endpoints.any { it.path == path }) throw Exception("No such path as `$path` exists!")
+                val matchingEndpoint = findMatchingEndpoint(path)
+                val endpoint: Endpoint = matchingEndpoint.first ?: throw Exception("No such path as `$path` exists!")
+
+                val replacables = matchingEndpoint.second
+                replacables.forEach {(key, value) ->
+                    println("[Replacable] $key - $value")
+                }
 
                 //Get response and execute the Unit in Endpoint whose path matches the uri path
                 val response = GetResponse(t)
-                endpoints.firstOrNull { it.path == path }?.unit?.invoke(response)
+                endpoint.unit.invoke(response)
 
             } catch (exception: Exception) {
 
@@ -62,6 +72,31 @@ class LightweightWebServer(var port: Int) {
 
                 errorResponse!!.invoke(response)
             }
+        }
+
+        private fun findMatchingEndpoint(path: String): Pair<Endpoint?, MutableMap<String, String>> {
+            val replaceableValues = mutableMapOf<String, String>()
+
+            val matchedEndpoint = endpoints.firstOrNull { endpoint ->
+                val endpointPath = endpoint.path.split("/")
+                val requestPath = path.split("/")
+
+                if (endpointPath.size != requestPath.size) {
+                    return@firstOrNull false
+                }
+
+                endpointPath.zip(requestPath).all { (endpointSegment, requestSegment) ->
+                    if (endpointSegment.startsWith("{") && endpointSegment.endsWith("}")) {
+                        // If the segment is a replaceable, extract its value
+                        val replaceableKey = endpointSegment.removeSurrounding("{", "}")
+                        replaceableValues[replaceableKey] = requestSegment
+                        true
+                    } else {
+                        endpointSegment == requestSegment
+                    }
+                }
+            }
+            return Pair(matchedEndpoint, replaceableValues)
         }
     }
 }

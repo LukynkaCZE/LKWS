@@ -3,7 +3,8 @@ import responses.Response
 data class Endpoint(
     val path: String,
     val unit: (res: Response) -> Unit,
-    val type: EndpointType
+    val type: EndpointType,
+    val replaceables: MutableList<Int> = mutableListOf()
 )
 
 data class Error(
