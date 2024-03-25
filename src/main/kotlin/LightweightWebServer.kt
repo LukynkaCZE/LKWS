@@ -63,7 +63,7 @@ class LightweightWebServer(var port: Int = 7270) {
 
                 // Default response if `errorResponse` is not set by the user
                 if(errorResponse == null) {
-                    response.respond("Something went wrong: $exception", 200)
+                    response.respond("Something went wrong: $exception", 500)
                     return
                 }
 
