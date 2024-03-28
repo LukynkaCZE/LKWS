@@ -3,8 +3,10 @@
 package responses
 
 import com.sun.net.httpserver.HttpExchange
+import java.io.BufferedReader
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.InputStreamReader
 
 open class Response(var httpExchange: HttpExchange) {
 
@@ -13,10 +15,11 @@ open class Response(var httpExchange: HttpExchange) {
     var responseHeaders: MutableList<Pair<String, String>> = mutableListOf()
 
     // Request
-    var parameters: MutableMap<String, String> = mutableMapOf()
+    var URLParameters: MutableMap<String, String> = mutableMapOf()
     var queryParameters: MutableMap<String, String> = mutableMapOf()
     var requestHeaders: MutableMap<String, String> = mutableMapOf()
     var requestCookies: MutableMap<String, String> = mutableMapOf()
+    var requestBody: String = ""
 
     init {
         // Query
@@ -33,6 +36,11 @@ open class Response(var httpExchange: HttpExchange) {
         val headers = httpExchange.requestHeaders
         headers.forEach { requestHeaders[it.key] = it.value.toString().removeSurrounding("[", "]") }
 
+        // Body
+        val reader = InputStreamReader(httpExchange.requestBody)
+        val bufferedReader = BufferedReader(reader)
+        requestBody = bufferedReader.readText()
+
         // Cookies
         val cookies = requestHeaders["Cookie"]
         if(cookies != null) {
@@ -42,6 +50,8 @@ open class Response(var httpExchange: HttpExchange) {
             if(cookies.contains(";")) {
                 val split = cookies.split("; ")
                 split.forEach { cookiesToParse.add(it) }
+            } else {
+                cookiesToParse.add(cookies)
             }
 
             cookiesToParse.forEach {
@@ -58,7 +68,7 @@ open class Response(var httpExchange: HttpExchange) {
     fun respond(byteArray: ByteArray, statusCode: Int? = null) {
         if(statusCode != null) this.responseStatusCode = statusCode
 
-        val os = httpExchange.responseBody;
+        val os = httpExchange.responseBody
 
         responseHeaders.forEach { httpExchange.responseHeaders.add(it.first, it.second) }
         httpExchange.sendResponseHeaders(this.responseStatusCode, byteArray.size.toLong())
