@@ -4,8 +4,54 @@ import java.io.File
 import kotlin.test.assertEquals
 
 class ResponseGetTests {
+
     init {
-        TestServer
+        newServer()
+    }
+
+    companion object {
+        private var server: LightweightWebServer? = null
+
+        private fun newServer() {
+            server?.end()
+            server = LightweightWebServer(6900)
+
+            server?.get("/statusCode") {
+                it.respond("200", 200)
+            }
+
+            server?.get("/response") {
+                it.respond("hello world", 200)
+            }
+
+            server?.get("/urlparams/{1}/storage/{2}") {
+                it.respond("${it.URLParameters["1"]},${it.URLParameters["2"]}")
+            }
+
+            server?.get("/query") {
+                it.respond("${it.queryParameters["client_token"]},${it.queryParameters["state"]}")
+            }
+
+            server?.get("/headers") {
+                it.addHeader("Authorization", "abc123")
+                it.respond("uwu")
+            }
+
+            server?.get("/image") {
+                it.respondFile(File("src/test/imgs/test.png"))
+            }
+
+            server?.get("/json") {
+                it.respondJson(File("src/test/test.json").readText())
+            }
+
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun `end server`(): Unit {
+            server?.end()
+        }
     }
 
     @Test
@@ -48,13 +94,5 @@ class ResponseGetTests {
     fun `test json`() {
         val response = testRequest("/json/")
         assertEquals(response.body(), File("src/test/test.json").readText())
-    }
-
-    companion object {
-        @JvmStatic
-        @AfterAll
-        fun `end server`(): Unit {
-            TestServer.server.end()
-        }
     }
 }

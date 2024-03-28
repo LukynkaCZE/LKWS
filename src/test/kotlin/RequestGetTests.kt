@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -15,6 +16,12 @@ class RequestGetTests {
         private fun newServer() {
             server?.end()
             server = LightweightWebServer(6900)
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun `end server`(): Unit {
+            server?.end()
         }
     }
 

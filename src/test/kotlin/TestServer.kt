@@ -1,9 +1,8 @@
 import java.io.File
 
-object TestServer {
+class TestServer {
 
     var server: LightweightWebServer = LightweightWebServer(6900)
-
     init {
         server.get("/statusCode") {
             it.respond("200", 200)
