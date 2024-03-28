@@ -8,21 +8,31 @@ import responses.GetResponse
 import responses.Response
 import java.net.InetSocketAddress
 
-class LightweightWebServer(var port: Int = 7270) {
+class LightweightWebServer(port: Int = 7270) {
 
-    private var server: HttpServer = HttpServer.create(InetSocketAddress(port), 0);
+    private var server: HttpServer
 
-    companion object {
-        var endpoints: MutableList<Endpoint> = mutableListOf()
-        var errorResponse: ((ErrorResponse) -> Unit)? = null
-    }
+    var endpoints: MutableList<Endpoint> = mutableListOf()
+    var errorResponse: ((ErrorResponse) -> Unit)? = null
 
     init {
+        try {
+            server = HttpServer.create(InetSocketAddress(port), 0)
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            throw Exception(ex.message)
+        }
+
         server.createContext("/", Handler())
         server.executor = null
         server.start()
 
         println("Running Lightweight Web Server on port $port")
+    }
+
+    fun end(exitCode: Int = 0) {
+        server.stop(exitCode)
+        println("Lightweight Web Server stopped with exit code $exitCode")
     }
 
     fun get(path: String, function: (res: GetResponse) -> Unit) {
@@ -41,25 +51,28 @@ class LightweightWebServer(var port: Int = 7270) {
         errorResponse = function
     }
 
-    private class Handler : HttpHandler {
-        override fun handle(t: HttpExchange) {
+    inner class Handler : HttpHandler {
+        override fun handle(exchange: HttpExchange) {
             try {
-
-                val path = t.requestURI.path
+                val path = exchange.requestURI.path
 
                 // Throw if there is no endpoint with that path
                 val matchingEndpoint = findMatchingEndpoint(path)
                 val endpoint: Endpoint = matchingEndpoint.first ?: throw Exception("No such path as `$path` exists!")
 
+                val response = when(endpoint.type) {
+                    EndpointType.GET -> GetResponse(exchange)
+                    else -> Response(exchange)
+                }
+
                 //Get response and execute the Unit in Endpoint whose path matches the uri path
-                val response = GetResponse(t)
-                response.parameters = matchingEndpoint.second
+                response.URLParameters = matchingEndpoint.second
                 endpoint.unit.invoke(response)
 
             } catch (exception: Exception) {
 
                 // Error Response also contains the thrown exception
-                val response = ErrorResponse(t, exception)
+                val response = ErrorResponse(exchange, exception)
 
                 // Default response if `errorResponse` is not set by the user
                 if(errorResponse == null) {
@@ -84,7 +97,6 @@ class LightweightWebServer(var port: Int = 7270) {
 
                 endpointPath.zip(requestPath).all { (endpointSegment, requestSegment) ->
                     if (endpointSegment.startsWith("{") && endpointSegment.endsWith("}")) {
-                        // If the segment is a replaceable, extract its value
                         val replaceableKey = endpointSegment.removeSurrounding("{", "}")
                         replaceableValues[replaceableKey] = requestSegment
                         true
