@@ -25,3 +25,8 @@ jobs:
         with:
           name: test-results
           path: jest-junit.xml
+  test-summary:
+    uses: test-summary/action@v2
+    with:
+      paths: "test-results/test/TEST*.xml"
+    if: always()
