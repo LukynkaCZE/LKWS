@@ -1,5 +1,4 @@
 import java.io.File
-import java.nio.file.Paths
 
 object TestServer {
 
@@ -15,7 +14,7 @@ object TestServer {
         }
 
         server.get("/urlparams/{1}/storage/{2}") {
-            it.respond("${it.parameters["1"]},${it.parameters["2"]}")
+            it.respond("${it.URLParameters["1"]},${it.URLParameters["2"]}")
         }
 
         server.get("/query") {

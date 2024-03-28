@@ -1,8 +1,9 @@
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.assertEquals
 
-class BasicGetTest {
+class ResponseGetTests {
     init {
         TestServer
     }
@@ -47,5 +48,13 @@ class BasicGetTest {
     fun `test json`() {
         val response = testRequest("/json/")
         assertEquals(response.body(), File("src/test/test.json").readText())
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterAll
+        fun `end server`(): Unit {
+            TestServer.server.end()
+        }
     }
 }
