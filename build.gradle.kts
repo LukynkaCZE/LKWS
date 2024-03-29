@@ -37,7 +37,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "cz.lukynka"
             artifactId = "lightweight-kotlin-webserver"
-            version = "1.0.0"
+            version = "0.4"
 
             from(components["java"])
         }
