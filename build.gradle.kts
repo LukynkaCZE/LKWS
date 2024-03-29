@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    `maven-publish`
     kotlin("jvm") version "1.9.22"
     application
 }
@@ -29,4 +30,16 @@ tasks.withType<KotlinCompile> {
 
 application {
     mainClass.set("MainKt")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "cz.lukynka"
+            artifactId = "lightweight-kotlin-webserver"
+            version = "1.0.0"
+
+            from(components["java"])
+        }
+    }
 }
