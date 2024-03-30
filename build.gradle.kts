@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "cz.lukynka"
-version = "1.0-SNAPSHOT"
+version = project.property("version").toString()
 
 repositories {
     mavenCentral()
@@ -35,11 +35,37 @@ application {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "cz.lukynka"
-            artifactId = "lightweight-kotlin-webserver"
-            version = "0.4"
+            groupId = group.toString()
+            artifactId = "LKWS"
+            version = version
 
             from(components["java"])
         }
+    }
+    repositories {
+        maven {
+            name = "test"
+            url = layout.buildDirectory.dir("/pom/").get().asFile.toURI()
+        }
+    }
+}
+
+tasks.jar {
+    val pomFile = File("./build/pom/cz/lukynka/LKWS/0.4/LKWS-0.4.pom")
+    val dotFile = File("./LKWS-0.4.pom")
+    val xmlFile = File("./pom.xml")
+    if(pomFile.exists()) {
+        dotFile.createNewFile()
+        xmlFile.createNewFile()
+        dotFile.writeText(pomFile.readText())
+        xmlFile.writeText(pomFile.readText())
+    }
+    project.logger.lifecycle(dotFile.exists().toString())
+    project.logger.lifecycle(dotFile.path)
+    from(dotFile.path) {
+        into("META-INF/maven/cz.lukynka/LKWS-0.4")
+    }
+    from(dotFile.path) {
+        into("/")
     }
 }
