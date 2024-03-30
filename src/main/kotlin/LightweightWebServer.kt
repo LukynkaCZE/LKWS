@@ -4,7 +4,6 @@ import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
 import responses.ErrorResponse
-import responses.GetResponse
 import responses.Response
 import java.net.InetSocketAddress
 
@@ -19,7 +18,7 @@ class LightweightWebServer(port: Int = 7270) {
         try {
             server = HttpServer.create(InetSocketAddress(port), 0)
         } catch (ex: Exception) {
-            ex.printStackTrace()
+            log(ex)
             throw Exception(ex.message)
         }
 
@@ -27,26 +26,47 @@ class LightweightWebServer(port: Int = 7270) {
         server.executor = null
         server.start()
 
-        println("Running Lightweight Web Server on port $port")
+        log("Running Lightweight Web Server on port $port", LogType.SUCCESS)
     }
 
     fun end(exitCode: Int = 0) {
         server.stop(exitCode)
-        println("Lightweight Web Server stopped with exit code $exitCode")
+        log("Lightweight Web Server stopped with exit code $exitCode", LogType.ERROR)
     }
 
-    fun get(path: String, function: (res: GetResponse) -> Unit) {
+    private fun path(path: String, type: EndpointType, function: (res: Response) -> Unit) {
         val endpointPath = if(path.startsWith("/")) path else "/$path"
         endpointPath.removeSuffix("/")
+
         val tokens = endpointPath.split("/")
-        val replacables = mutableListOf<Int>()
+        val urlParams = mutableListOf<Int>()
+
         tokens.forEachIndexed { index, it ->
             if(it.startsWith("{") && it.endsWith("}"))
-            replacables.add(index)
+                urlParams.add(index)
         }
-        endpoints.add(Endpoint(endpointPath, function as (Response) -> Unit, EndpointType.GET, replacables))
+
+        endpoints.add(Endpoint(endpointPath, function, type, urlParams))
     }
 
+    fun get(path: String, function: (res: Response) -> Unit) {
+        path(path, EndpointType.GET, function)
+    }
+    fun put(path: String, function: (res: Response) -> Unit) {
+        path(path, EndpointType.PUT, function)
+    }
+    fun post(path: String, function: (res: Response) -> Unit) {
+        path(path, EndpointType.POST, function)
+    }
+    fun patch(path: String, function: (res: Response) -> Unit) {
+        path(path, EndpointType.PATCH, function)
+    }
+    fun delete(path: String, function: (res: Response) -> Unit) {
+        path(path, EndpointType.DELETE, function)
+    }
+    fun options(path: String, function: (res: Response) -> Unit) {
+        path(path, EndpointType.OPTIONS, function)
+    }
     fun error(function: (res: ErrorResponse) -> Unit) {
         errorResponse = function
     }
@@ -56,14 +76,15 @@ class LightweightWebServer(port: Int = 7270) {
             try {
                 val path = exchange.requestURI.path
 
-                // Throw if there is no endpoint with that path
-                val matchingEndpoint = findMatchingEndpoint(path)
-                val endpoint: Endpoint = matchingEndpoint.first ?: throw Exception("No such path as `$path` exists!")
+                val type = EndpointType.valueOf(exchange.requestMethod);
 
-                val response = when(endpoint.type) {
-                    EndpointType.GET -> GetResponse(exchange)
-                    else -> Response(exchange)
-                }
+                // Throw if there is no endpoint with that path
+                val matchingEndpoint = findMatchingEndpoint(path, type)
+
+                if(matchingEndpoint.first == null || matchingEndpoint.first!!.type != type) throw Exception("No such path as `$path` exists for type $type")
+                val endpoint = matchingEndpoint.first!!
+
+                val response = Response(exchange)
 
                 //Get response and execute the Unit in Endpoint whose path matches the uri path
                 response.URLParameters = matchingEndpoint.second
@@ -77,6 +98,18 @@ class LightweightWebServer(port: Int = 7270) {
                 // Default response if `errorResponse` is not set by the user
                 if(errorResponse == null) {
                     response.respond("Something went wrong: $exception", 500)
+                    var isPathError = false
+                    if(exception.message != null) {
+                        val split = exception.message!!.split("`")
+                        if (split[0].contains("No such path as")) {
+                            val splitType = split[2].split("type ")
+                            log("${exchange.remoteAddress} tried to access ${split[1]} but that path with type ${splitType[1]} does not exist", LogType.WARNING)
+                            isPathError = true
+                        }
+                    }
+                    if(!isPathError) {
+                        log(exception)
+                    }
                     return
                 }
 
@@ -84,10 +117,14 @@ class LightweightWebServer(port: Int = 7270) {
             }
         }
 
-        private fun findMatchingEndpoint(path: String): Pair<Endpoint?, MutableMap<String, String>> {
+        private fun findMatchingEndpoint(path: String, type: EndpointType): Pair<Endpoint?, MutableMap<String, String>> {
             val replaceableValues = mutableMapOf<String, String>()
 
             val matchedEndpoint = endpoints.firstOrNull { endpoint ->
+                if (endpoint.type != type) {
+                    return@firstOrNull false
+                }
+
                 val endpointPath = endpoint.path.split("/")
                 val requestPath = path.split("/")
 

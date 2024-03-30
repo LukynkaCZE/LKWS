@@ -71,8 +71,8 @@ open class Response(var httpExchange: HttpExchange) {
         val os = httpExchange.responseBody
 
         responseHeaders.forEach { httpExchange.responseHeaders.add(it.first, it.second) }
-        httpExchange.sendResponseHeaders(this.responseStatusCode, byteArray.size.toLong())
 
+        httpExchange.sendResponseHeaders(this.responseStatusCode, byteArray.size.toLong())
         os.write(byteArray)
         os.close()
     }

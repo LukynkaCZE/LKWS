@@ -7,14 +7,23 @@ plugins {
 }
 
 group = "cz.lukynka"
-version = project.property("version").toString()
+version = "1.0"
+
+val githubUser: String = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USER")
+val githubPassword: String = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
 
 repositories {
     mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/LukynkaCZE/PrettyLog")
+        credentials {username = githubUser; password = githubPassword}
+    }
 }
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("cz.lukynka:pretty-log:1.2")
 }
 
 tasks.test {
@@ -32,40 +41,20 @@ application {
     mainClass.set("MainKt")
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = group.toString()
-            artifactId = "LKWS"
-            version = version
 
-            from(components["java"])
-        }
-    }
+publishing {
     repositories {
         maven {
-            name = "test"
-            url = layout.buildDirectory.dir("/pom/").get().asFile.toURI()
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/LukynkaCZE/LKWS")
+            credentials {username = githubUser; password = githubPassword}
         }
     }
-}
-
-tasks.jar {
-    val pomFile = File("./build/pom/cz/lukynka/LKWS/0.4/LKWS-0.4.pom")
-    val dotFile = File("./LKWS-0.4.pom")
-    val xmlFile = File("./pom.xml")
-    if(pomFile.exists()) {
-        dotFile.createNewFile()
-        xmlFile.createNewFile()
-        dotFile.writeText(pomFile.readText())
-        xmlFile.writeText(pomFile.readText())
-    }
-    project.logger.lifecycle(dotFile.exists().toString())
-    project.logger.lifecycle(dotFile.path)
-    from(dotFile.path) {
-        into("META-INF/maven/cz.lukynka/LKWS-0.4")
-    }
-    from(dotFile.path) {
-        into("/")
+    publications {
+        register<MavenPublication>("gpr") {
+            artifactId = "lkws"
+            version = version
+            from(components["java"])
+        }
     }
 }

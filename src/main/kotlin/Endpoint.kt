@@ -12,7 +12,7 @@ data class Error(
 )
 
 
-enum class EndpointType {
+enum class EndpointType() {
     GET,
     PUT,
     POST,
