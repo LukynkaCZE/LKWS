@@ -12,6 +12,8 @@ version = "1.0"
 val githubUser: String = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USER")
 val githubPassword: String = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
 
+java.sourceCompatibility = JavaVersion.VERSION_17
+
 repositories {
     mavenCentral()
     maven {
@@ -23,7 +25,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("cz.lukynka:pretty-log:1.2.1")
+    implementation("cz.lukynka:pretty-log:1.2.2")
 }
 
 tasks.test {
@@ -32,6 +34,7 @@ tasks.test {
         events("passed", "skipped", "failed")
     }
 }
+
 
 tasks {
     compileKotlin {
