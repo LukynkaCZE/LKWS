@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: gradle build -GITHUB_USER=${{ env.GITHUB_USER }} -GITHUB_TOKEN=${{ env.GITHUB_TOKEN }}
+      - run: GITHUB_USER=${{ env.GITHUB_USER }} GITHUB_TOKEN=${{ env.GITHUB_TOKEN }} gradle build
       - run: gradle test
       - name: Test Summary
         uses: test-summary/action@v2
