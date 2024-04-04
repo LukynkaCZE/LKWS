@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("cz.lukynka:pretty-log:1.2")
+    implementation("cz.lukynka:pretty-log:1.2.1")
 }
 
 tasks.test {
