@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: MAVEN_USER=${{ env.GITHUB_USER }} MAVEN_PASS=${{ env.GITHUB_TOKEN }} gradle build
+      - run: MAVEN_USER=${{ env.MAVEN_USER }} MAVEN_PASS=${{ env.MAVEN_PASS }} gradle build
       - run: gradle test
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
