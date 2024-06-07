@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     `maven-publish`
     kotlin("jvm") version "1.9.22"
@@ -9,23 +7,19 @@ plugins {
 group = "cz.lukynka"
 version = "1.0"
 
-val githubUser: String = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USER")
-val githubPassword: String = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
-
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
     maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/LukynkaCZE/PrettyLog")
-        credentials {username = githubUser; password = githubPassword}
+        name = "devOS"
+        url = uri("https://mvn.devos.one/releases")
     }
 }
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("cz.lukynka:pretty-log:1.2.2")
+    implementation("cz.lukynka:pretty-log:1.3")
 }
 
 tasks.test {
@@ -52,13 +46,17 @@ application {
 publishing {
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/LukynkaCZE/LKWS")
-            credentials {username = githubUser; password = githubPassword}
+            url = uri("https://mvn.devos.one/releases")
+            credentials {
+                username = System.getenv()["MAVEN_USER"]
+                password = System.getenv()["MAVEN_PASS"]
+            }
         }
     }
+
     publications {
-        register<MavenPublication>("gpr") {
+        register<MavenPublication>("maven") {
+            groupId = "cz.lukynka"
             artifactId = "lkws"
             version = version
             from(components["java"])

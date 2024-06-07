@@ -2,10 +2,37 @@
 
 A simple, easy to use and lightweight kotlin web server for small quick projects
 
-## How to Install
+## Installation
 
-(I will write this section later once its finished)
+<img src="https://cdn.worldvectorlogo.com/logos/kotlin-2.svg" width="16px"></img>
+**Kotlin DSL**
+```kotlin
+repositories {
+    maven {
+        name = "devOS"
+        url = uri("https://mvn.devos.one/releases")
+    }
+}
 
+dependencies {
+    implementation("cz.lukynka:lkws:1.0")
+}
+```
+<img src="https://github.com/LukynkaCZE/PrettyLog/assets/48604271/3293feca-7395-4100-8b61-257ba40dbe3c" width="18px"></img>
+**Gradle Groovy**
+```groovy
+repositories {
+    mavenCentral()
+    maven {
+        name "devOS"
+        url "https://mvn.devos.one/releases"
+    }
+}
+
+dependencies {
+    implementation 'cz.lukynka:lkws:1.0'
+}
+```
 ## How to Use
 
 You want to create new instance of `LightweightWebServer` with port supplied as parameter _(defaults to 7270)_
@@ -21,10 +48,34 @@ server.get("/uwu") { res ->
     res.respond("owo :3")
 }
 ```
-You can additionally include status code after the response
+
+you can use `Response.URLParameters[param]` to get url parameter
+
 ```kotlin
-server.get("/teapot") { res ->
-    res.respond("🫖", 418)
+server.put("/users/{USER}/settings") {
+    val user = it.URLParameters["USER"]
+    val updatedSettingsJson = it.requestBody
+    //handle stuff
+
+    it.respond("settings changed", 201)
+}
+```
+
+You can use `Response.requestCookies[cookie]` to get value of cookie. Will return `null` if cookie was not found. To return error to user you can simply throw exception. Error page is customizable (Error Handling section below)
+
+```kotlin
+server.post("/projects/create") {
+    if(it.requestCookies["token"] != superSecretTokenTrustMe) throw Exception("nuh uh, you are not logged in")
+
+    val projectName = it.queryParameters["name"]
+    val redirectAfterCreated = it.queryParameters["redirect"].toBoolean()
+    //whatever here
+
+    if(redirectAfterCreated) {
+        it.respondRedirect("/projects/$projectName")
+    } else {
+        it.respond("project created", 201)
+    }
 }
 ```
 
@@ -33,11 +84,12 @@ You can add Headers by adding `Pair<string, string>`to the `headers` variable of
 ```kotlin
 server.get("/status") { res ->
     res.headers.Add(Pair("Content-Type", "application/json"))
-    res.respondRedirect("{ 'status': 'operational' }")
+    res.respondJson("{ 'status': 'operational' }")
 }
 ```
 ---
-**⚠️ More request types coming soon ⚠️**
+
+Additionally, this supports all request types (GET, POST, PUT, HEAD, PATCH etc.)
 
 ## Error Handling
 
@@ -48,6 +100,3 @@ server.error { res ->
     res.respond("oopsie happened: ${res.exception}", 500)
 }
 ```
-
----
-**⚠️ There will be more. I am working on it :3 ⚠️**
