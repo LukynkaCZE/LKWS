@@ -17,12 +17,12 @@ jobs:
   build-test:
     environment: Actions
     env:
-      GITHUB_TOKEN: ${{ secrets.TOKEN }}
-      GITHUB_USER: ${{ secrets.USER }}
+      MAVEN_PASS: ${{ secrets.TOKEN }}
+      MAVEN_USER: ${{ secrets.USER }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: GITHUB_USER=${{ env.GITHUB_USER }} GITHUB_TOKEN=${{ env.GITHUB_TOKEN }} gradle build
+      - run: MAVEN_USER=${{ env.GITHUB_USER }} MAVEN_PASS=${{ env.GITHUB_TOKEN }} gradle build
       - run: gradle test
       - name: Test Summary
         uses: test-summary/action@v2
