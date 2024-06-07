@@ -10,6 +10,7 @@ class RequestGetTests {
         newServer()
     }
 
+
     companion object {
         private var server: LightweightWebServer? = null
 
