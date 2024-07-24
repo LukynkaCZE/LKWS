@@ -1,5 +1,5 @@
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Test
+import kotlin.test.AfterTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TypeTests {
@@ -16,9 +16,8 @@ class TypeTests {
             server = LightweightWebServer(6900)
         }
 
-        @JvmStatic
-        @AfterAll
-        fun `end server`(): Unit {
+        @AfterTest
+        fun endServer(): Unit {
             server?.end()
         }
     }

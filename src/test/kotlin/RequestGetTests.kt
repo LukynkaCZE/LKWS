@@ -1,11 +1,7 @@
+import org.junit.After
 import kotlin.test.*
 
 class RequestGetTests {
-
-    init {
-        newServer()
-    }
-
 
     companion object {
         private var server: LightweightWebServer? = null
@@ -15,14 +11,15 @@ class RequestGetTests {
             server = LightweightWebServer(6900)
         }
 
-        @AfterTest
-        fun `end server`(): Unit {
+        @After
+        fun endServer(): Unit {
             server?.end()
         }
     }
 
     @Test
     fun `test body`() {
+        newServer()
         var request: String? = null
         server?.get("/body") {
             request = it.requestBody
@@ -32,10 +29,12 @@ class RequestGetTests {
 
         waitUntilNotNull(request)
         assertEquals("you there?", request)
+        endServer()
     }
 
     @Test
     fun `test headers`() {
+        newServer()
         var headers: MutableMap<String, String>? = null
         server?.get("/headers") {
             headers = it.requestHeaders
@@ -48,10 +47,12 @@ class RequestGetTests {
         assertContains(headers!!, "Authorization")
         assertEquals("weird/stuff", headers!!["Content-type"])
         assertEquals("admin", headers!!["Authorization"])
+        endServer()
     }
 
     @Test
     fun `test url params`() {
+        newServer()
         var urlParams: MutableMap<String, String>? = null
         server?.get("/urlparams/{username}/data/{password}") {
             urlParams = it.URLParameters
@@ -65,10 +66,12 @@ class RequestGetTests {
         assertContains(urlParams!!, "password")
         assertEquals("LukynkaCZE", urlParams!!["username"])
         assertEquals("colonthree", urlParams!!["password"])
+        endServer()
     }
 
     @Test
     fun `test query params`() {
+        newServer()
         var queryParams: MutableMap<String, String>? = null
         server?.get("/queryParams") {
             queryParams = it.queryParameters
@@ -82,10 +85,12 @@ class RequestGetTests {
         assertContains(queryParams!!, "login_state")
         assertEquals("Z5Z5HdAmH8JxpLr", queryParams!!["token"]!!)
         assertEquals("1", queryParams!!["login_state"])
+        endServer()
     }
 
     @Test
     fun `test single cookie`() {
+        newServer()
         var cookie: MutableMap<String, String>? = null
         server?.get("/cookie") {
             cookie = it.requestCookies
@@ -98,10 +103,12 @@ class RequestGetTests {
         assertContains(cookie!!, "token")
         assertNotEquals("false", cookie!!["accepted_cookies"])
         assertEquals("Z5Z5HdAmH8JxpLr", cookie!!["token"])
+        endServer()
     }
 
     @Test
     fun `test cookies`() {
+        newServer()
         var cookies: MutableMap<String, String>? = null
         server?.get("/cookies") {
             cookies = it.requestCookies
@@ -115,5 +122,6 @@ class RequestGetTests {
         assertContains(cookies!!, "accepted_cookies")
         assertEquals("false", cookies!!["accepted_cookies"])
         assertEquals("Z5Z5HdAmH8JxpLr", cookies!!["token"])
+        endServer()
     }
 }
