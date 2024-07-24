@@ -4,7 +4,8 @@ data class Endpoint(
     val path: String,
     val unit: (res: Response) -> Unit,
     val type: EndpointType,
-    val replaceables: MutableList<Int> = mutableListOf()
+    val replaceables: MutableList<Int> = mutableListOf(),
+    val auth: ((Response) -> Boolean)? = null
 )
 
 data class Error(

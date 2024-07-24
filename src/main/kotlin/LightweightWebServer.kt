@@ -36,7 +36,7 @@ class LightweightWebServer(port: Int = 7270) {
         log("Lightweight Web Server stopped with exit code $exitCode", LogType.ERROR)
     }
 
-    private fun path(path: String, type: EndpointType, function: (res: Response) -> Unit) {
+    private fun path(path: String, type: EndpointType, auth: ((Response) -> Boolean)?, function: (res: Response) -> Unit) {
         val endpointPath = if(path.startsWith("/")) path else "/$path"
         endpointPath.removeSuffix("/")
 
@@ -48,27 +48,47 @@ class LightweightWebServer(port: Int = 7270) {
                 urlParams.add(index)
         }
 
-        endpoints.add(Endpoint(endpointPath, function, type, urlParams))
+        endpoints.add(Endpoint(endpointPath, function, type, urlParams, auth))
     }
 
     fun get(path: String, function: (res: Response) -> Unit) {
-        path(path, EndpointType.GET, function)
+        path(path, EndpointType.GET, null, function)
     }
     fun put(path: String, function: (res: Response) -> Unit) {
-        path(path, EndpointType.PUT, function)
+        path(path, EndpointType.PUT, null, function)
     }
     fun post(path: String, function: (res: Response) -> Unit) {
-        path(path, EndpointType.POST, function)
+        path(path, EndpointType.POST, null, function)
     }
     fun patch(path: String, function: (res: Response) -> Unit) {
-        path(path, EndpointType.PATCH, function)
+        path(path, EndpointType.PATCH, null, function)
     }
     fun delete(path: String, function: (res: Response) -> Unit) {
-        path(path, EndpointType.DELETE, function)
+        path(path, EndpointType.DELETE, null, function)
     }
     fun options(path: String, function: (res: Response) -> Unit) {
-        path(path, EndpointType.OPTIONS, function)
+        path(path, EndpointType.OPTIONS, null, function)
     }
+
+    fun get(path: String, auth: ((Response) -> Boolean)?, function: (res: Response) -> Unit) {
+        path(path, EndpointType.GET, auth, function)
+    }
+    fun put(path: String, auth: ((Response) -> Boolean)?, function: (res: Response) -> Unit) {
+        path(path, EndpointType.PUT, auth, function)
+    }
+    fun post(path: String, auth: ((Response) -> Boolean)?, function: (res: Response) -> Unit) {
+        path(path, EndpointType.POST, auth, function)
+    }
+    fun patch(path: String, auth: ((Response) -> Boolean)?, function: (res: Response) -> Unit) {
+        path(path, EndpointType.PATCH, auth, function)
+    }
+    fun delete(path: String, auth: ((Response) -> Boolean)?, function: (res: Response) -> Unit) {
+        path(path, EndpointType.DELETE, auth, function)
+    }
+    fun options(path: String, auth: ((Response) -> Boolean)?, function: (res: Response) -> Unit) {
+        path(path, EndpointType.OPTIONS, auth, function)
+    }
+
     fun error(function: (res: ErrorResponse) -> Unit) {
         errorResponse = function
     }
@@ -90,6 +110,8 @@ class LightweightWebServer(port: Int = 7270) {
 
                 //Get response and execute the Unit in Endpoint whose path matches the uri path
                 response.URLParameters = matchingEndpoint.second
+                val auth = endpoint.auth
+                if(auth != null && !auth(response)) throw Exception("Not authorized")
                 endpoint.unit.invoke(response)
 
             } catch (exception: Exception) {

@@ -1,4 +1,7 @@
+import cz.lukynka.prettylog.log
 import org.junit.After
+import responses.Response
+import java.io.File
 import kotlin.test.*
 
 class RequestGetTests {
@@ -122,6 +125,29 @@ class RequestGetTests {
         assertContains(cookies!!, "accepted_cookies")
         assertEquals("false", cookies!!["accepted_cookies"])
         assertEquals("Z5Z5HdAmH8JxpLr", cookies!!["token"])
+        endServer()
+    }
+
+    @Test
+    fun `test middleware`() {
+        newServer()
+        val token = "imdownbadforvonlycaon"
+
+        fun isAuth(response: Response): Boolean {
+            log(response.requestHeaders.toString())
+            return response.requestHeaders["Token"] == token
+        }
+
+        val server = LightweightWebServer(6969)
+        server.get("/lycaon", ::isAuth) {
+            it.respondFile(File("src/test/imgs/lycaon.jpg"), 200, "image")
+        }
+        val reqWithoutToken = testRequest("/lycaon")
+        val reqWithToken = testRequest("/lycaon", "", mutableMapOf(Pair("Token", "imdownbadforvonlycaon")))
+
+        assert(reqWithoutToken.statusCode() != 200)
+        assert(reqWithToken.statusCode() != 200)
+
         endServer()
     }
 }
