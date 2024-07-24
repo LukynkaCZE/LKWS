@@ -33,6 +33,16 @@ jobs:
       MAVEN_USER: ${{ secrets.USER }}
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Add execute permissions for gradlew
+        run: chmod +x gradlew
       - uses: actions/checkout@v3
       - run: MAVEN_USER="${{ env.MAVEN_USER }}" MAVEN_PASS="${{ env.MAVEN_PASS }}" gradle build
       - run: gradle test
