@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation("cz.lukynka:lkws:1.0")
+    implementation("cz.lukynka:lkws:1.1")
 }
 ```
 <img src="https://github.com/LukynkaCZE/PrettyLog/assets/48604271/3293feca-7395-4100-8b61-257ba40dbe3c" width="18px"></img>
@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'cz.lukynka:lkws:1.0'
+    implementation 'cz.lukynka:lkws:1.1'
 }
 ```
 ## How to Use
@@ -87,6 +87,24 @@ server.get("/status") { res ->
     res.respondJson("{ 'status': 'operational' }")
 }
 ```
+
+You can also add middleware to all requests like this:
+
+```kotlin
+
+val token = "imdownbadforvonlycaon"
+
+fun isAuth(response: Response): Boolean {
+    return response.requestHeaders["Token"] == token
+}
+
+server.get("/status", ::isAuth) { res ->
+    it.respondFile(File("src/test/imgs/lycaon.jpg"), 200, "image")
+}
+```
+
+The server will automatically throw an exception if the auth function returns **false**
+
 ---
 
 Additionally, this supports all request types (GET, POST, PUT, HEAD, PATCH etc.)

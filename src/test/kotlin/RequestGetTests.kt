@@ -134,7 +134,6 @@ class RequestGetTests {
         val token = "imdownbadforvonlycaon"
 
         fun isAuth(response: Response): Boolean {
-            log(response.requestHeaders.toString())
             return response.requestHeaders["Token"] == token
         }
 
