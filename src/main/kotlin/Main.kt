@@ -1,3 +1,5 @@
+import cz.lukynka.prettylog.LoggerSettings
+import cz.lukynka.prettylog.LoggerStyle
 import java.lang.Exception
 
 fun main(args: Array<String>) {

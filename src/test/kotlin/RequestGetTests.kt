@@ -1,8 +1,4 @@
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Test
-import kotlin.test.assertContains
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
+import kotlin.test.*
 
 class RequestGetTests {
 
@@ -19,8 +15,7 @@ class RequestGetTests {
             server = LightweightWebServer(6900)
         }
 
-        @JvmStatic
-        @AfterAll
+        @AfterTest
         fun `end server`(): Unit {
             server?.end()
         }

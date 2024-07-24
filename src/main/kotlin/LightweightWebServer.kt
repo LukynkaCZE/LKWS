@@ -3,6 +3,8 @@
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
+import cz.lukynka.prettylog.LogType
+import cz.lukynka.prettylog.log
 import responses.ErrorResponse
 import responses.Response
 import java.net.InetSocketAddress
