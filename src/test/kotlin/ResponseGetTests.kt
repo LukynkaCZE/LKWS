@@ -1,3 +1,4 @@
+import cz.lukynka.lkws.LightweightWebServer
 import org.junit.After
 import java.io.File
 import kotlin.test.Test
@@ -10,7 +11,7 @@ class ResponseGetTests {
 
         private fun newServer() {
             server?.end()
-            server = LightweightWebServer(6900)
+            server = LightweightWebServer(89)
 
             server?.get("/statusCode") {
                 it.respond("200", 200)

@@ -1,4 +1,4 @@
-package responses
+package cz.lukynka.lkws.responses
 
 import com.sun.net.httpserver.HttpExchange
 

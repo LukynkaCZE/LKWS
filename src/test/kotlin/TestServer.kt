@@ -1,8 +1,9 @@
+import cz.lukynka.lkws.LightweightWebServer
 import java.io.File
 
 class TestServer {
 
-    var server: LightweightWebServer = LightweightWebServer(6900)
+    var server: LightweightWebServer = LightweightWebServer(89)
     init {
         server.get("/statusCode") {
             it.respond("200", 200)

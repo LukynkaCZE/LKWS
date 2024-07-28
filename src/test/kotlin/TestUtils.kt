@@ -5,7 +5,7 @@ import java.net.http.HttpResponse
 
 fun tUri(string: String): URI {
     val endpoint = if(string.endsWith("/")) string.removeSuffix("/") else string
-    return URI.create("http://127.0.0.1:6900$endpoint")
+    return URI.create("http://127.0.0.1:89$endpoint")
 }
 
 fun testRequest(url: String, body: String? = "", headers: MutableMap<String, String> = mutableMapOf()): HttpResponse<String> {

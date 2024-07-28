@@ -1,12 +1,14 @@
 @file:Suppress("UNCHECKED_CAST")
 
+package cz.lukynka.lkws
+
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
 import cz.lukynka.prettylog.LogType
 import cz.lukynka.prettylog.log
-import responses.ErrorResponse
-import responses.Response
+import cz.lukynka.lkws.responses.ErrorResponse
+import cz.lukynka.lkws.responses.Response
 import java.net.InetSocketAddress
 
 class LightweightWebServer(port: Int = 7270) {

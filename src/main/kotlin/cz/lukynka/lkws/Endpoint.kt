@@ -1,4 +1,6 @@
-import responses.Response
+package cz.lukynka.lkws
+
+import cz.lukynka.lkws.responses.Response
 
 data class Endpoint(
     val path: String,

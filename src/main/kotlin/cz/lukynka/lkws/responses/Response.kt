@@ -1,6 +1,6 @@
 @file:Suppress("MemberVisibilityCanBePrivate")
 
-package responses
+package cz.lukynka.lkws.responses
 
 import com.sun.net.httpserver.HttpExchange
 import java.io.BufferedReader

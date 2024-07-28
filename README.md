@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation("cz.lukynka:lkws:1.1")
+    implementation("cz.lukynka:lkws:1.2")
 }
 ```
 <img src="https://github.com/LukynkaCZE/PrettyLog/assets/48604271/3293feca-7395-4100-8b61-257ba40dbe3c" width="18px"></img>
@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'cz.lukynka:lkws:1.1'
+    implementation 'cz.lukynka:lkws:1.2'
 }
 ```
 ## How to Use

@@ -1,3 +1,5 @@
+package cz.lukynka.lkws
+
 import cz.lukynka.prettylog.LoggerSettings
 import cz.lukynka.prettylog.LoggerStyle
 
